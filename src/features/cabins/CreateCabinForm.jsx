@@ -6,6 +6,9 @@ import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createCabin } from "../../services/apiCabins";
+import toast from "react-hot-toast";
 
 const FormRow = styled.div`
     display: grid;
@@ -44,17 +47,38 @@ const Error = styled.span`
 `;
 
 function CreateCabinForm() {
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit, reset } = useForm();
+
+    const queryClient = useQueryClient();
+
+    const { isLoading: isCreating, mutate } = useMutation({
+        mutationFn: createCabin,
+
+        onSuccess: () => {
+            toast.success("Cabin created successfully");
+            queryClient.invalidateQueries({
+                queryKey: ["cabins"],
+            });
+            reset();
+        },
+
+        onError: (err) => toast.error(err.message),
+    });
 
     function onSubmit(data) {
-        console.log(data);
+        mutate(data);
     }
 
     return (
         <Form onSubmit={handleSubmit(onSubmit)}>
             <FormRow>
                 <Label htmlFor="name">Cabin name</Label>
-                <Input type="text" id="name" {...register("name")} />
+                <Input
+                    type="text"
+                    id="name"
+                    {...register("name")}
+                    disabled={isCreating}
+                />
             </FormRow>
 
             <FormRow>
@@ -63,6 +87,7 @@ function CreateCabinForm() {
                     type="number"
                     id="maxCapacity"
                     {...register("maxCapacity")}
+                    disabled={isCreating}
                 />
             </FormRow>
 
@@ -72,6 +97,7 @@ function CreateCabinForm() {
                     type="number"
                     id="regularPrice"
                     {...register("regularPrice")}
+                    disabled={isCreating}
                 />
             </FormRow>
 
@@ -82,6 +108,7 @@ function CreateCabinForm() {
                     id="discount"
                     defaultValue={0}
                     {...register("discount")}
+                    disabled={isCreating}
                 />
             </FormRow>
 
@@ -92,6 +119,7 @@ function CreateCabinForm() {
                     id="description"
                     defaultValue=""
                     {...register("description")}
+                    disabled={isCreating}
                 />
             </FormRow>
 
@@ -105,7 +133,9 @@ function CreateCabinForm() {
                 <Button variation="secondary" type="reset">
                     Cancel
                 </Button>
-                <Button>Add cabin</Button>
+                <Button>
+                    {isCreating ? "Creating a cabin ..." : "Add cabin"}
+                </Button>
             </FormRow>
         </Form>
     );
