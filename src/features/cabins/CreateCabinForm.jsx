@@ -15,8 +15,14 @@ const Label = styled.label`
     font-weight: 500;
 `;
 
-function CreateCabinForm() {
-    const { register, handleSubmit, reset, getValues, formState } = useForm();
+function CreateCabinForm({ cabinToEdit = {} }) {
+    const { id: editId, ...editValues } = cabinToEdit;
+
+    const isEditSession = Boolean(editId);
+
+    const { register, handleSubmit, reset, getValues, formState } = useForm({
+        defaultValues: isEditSession ? editValues : {},
+    });
 
     const { errors } = formState;
 
@@ -37,7 +43,7 @@ function CreateCabinForm() {
     });
 
     function onSubmit(data) {
-        mutate(data);
+        mutate({ ...data, image: data.image[0] });
     }
 
     return (
@@ -113,7 +119,13 @@ function CreateCabinForm() {
 
             <FormRow>
                 <Label htmlFor="image">Cabin photo</Label>
-                <FileInput id="image" accept="image/*" />
+                <FileInput
+                    id="image"
+                    {...register("image", {
+                        required: "This field is required",
+                    })}
+                    accept="image/*"
+                />
             </FormRow>
 
             <FormRow>
@@ -121,8 +133,8 @@ function CreateCabinForm() {
                 <Button variation="secondary" type="reset">
                     Cancel
                 </Button>
-                <Button>
-                    {isCreating ? "Creating a cabin ..." : "Add cabin"}
+                <Button disabled={isCreating}>
+                    {isEditSession ? "Edit Cabin" : "Add cabin"}
                 </Button>
             </FormRow>
         </Form>
