@@ -57,9 +57,9 @@ function MainNav() {
     return (
         <nav>
             <NavList>
-                <StyledNavLink to="/">
+                <StyledNavLink to="/dashboard">
                     <HiOutlineHome />
-                    <span>Home</span>
+                    <span>Dashboard</span>
                 </StyledNavLink>
                 <StyledNavLink to="/bookings">
                     <HiCalendarDays />
